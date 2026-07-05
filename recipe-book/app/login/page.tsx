@@ -17,6 +17,17 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  async function testRawFetch() {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/settings`, {
+        headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! },
+      })
+      console.log('DEBUG raw fetch status:', res.status, await res.text())
+    } catch (e) {
+      console.log('DEBUG raw fetch threw:', e)
+    }
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -65,6 +76,10 @@ export default function LoginPage() {
 
         <Button type="submit" disabled={loading}>
           {loading ? 'Signing in…' : 'Sign in'}
+        </Button>
+
+        <Button type="button" variant="outline" onClick={testRawFetch}>
+          DEBUG: test raw fetch
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
