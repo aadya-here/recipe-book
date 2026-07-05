@@ -5,10 +5,8 @@ const {
   PHASE_PRODUCTION_BUILD,
 } = require("next/constants");
 
-/** @type {(phase: string, defaultConfig: import("next").NextConfig) => Promise<import("next").NextConfig>} */
-module.exports = async (phase) => {
-  /** @type {import("next").NextConfig} */
-  const nextConfig = {};
+module.exports = async (phase: string): Promise<NextConfig> => {
+  const nextConfig: NextConfig = {};
 
   if (phase === PHASE_DEVELOPMENT_SERVER || phase === PHASE_PRODUCTION_BUILD) {
     // This is optional!
