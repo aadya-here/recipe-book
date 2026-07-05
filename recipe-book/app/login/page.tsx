@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label'
 export default function LoginPage() {
   console.log('DEBUG supabase url:', JSON.stringify(process.env.NEXT_PUBLIC_SUPABASE_URL))
   console.log('DEBUG supabase key set:', Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY))
+  console.log('DEBUG supabase key raw:', JSON.stringify(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY))
+  console.log('DEBUG supabase key length:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length)
   const supabase = createClient()
   const router = useRouter()
   const [email, setEmail] = useState('')
