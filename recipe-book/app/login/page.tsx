@@ -8,27 +8,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 export default function LoginPage() {
-  console.log('DEBUG supabase url:', JSON.stringify(process.env.NEXT_PUBLIC_SUPABASE_URL))
-  console.log('DEBUG supabase key set:', Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY))
-  console.log('DEBUG supabase key raw:', JSON.stringify(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY))
-  console.log('DEBUG supabase key length:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length)
   const supabase = createClient()
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  async function testRawFetch() {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/settings`, {
-        headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! },
-      })
-      console.log('DEBUG raw fetch status:', res.status, await res.text())
-    } catch (e) {
-      console.log('DEBUG raw fetch threw:', e)
-    }
-  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -78,10 +63,6 @@ export default function LoginPage() {
 
         <Button type="submit" disabled={loading}>
           {loading ? 'Signing in…' : 'Sign in'}
-        </Button>
-
-        <Button type="button" variant="outline" onClick={testRawFetch}>
-          DEBUG: test raw fetch
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
