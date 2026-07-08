@@ -1,5 +1,5 @@
 'use server'
-import { createClient } from '@/utils/supabase/server'
+import { createClient, requireUser } from '@/utils/supabase/server'
 import { recipeSchema, type RecipeFormValues } from '@/lib/schemas/recipe'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -16,10 +16,7 @@ export async function createRecipe(values: RecipeFormValues, photo: File | null,
   const parsed = recipeSchema.parse(values)
 
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error('Must be signed in')
+  const user = await requireUser(supabase)
 
   const slug = `${slugify(parsed.title)}-${crypto.randomUUID().slice(0, 6)}`
 
@@ -53,36 +50,38 @@ export async function createRecipe(values: RecipeFormValues, photo: File | null,
     )
   }
 
-  for (let i = 0; i < parsed.ingredients.length; i++) {
-    const row = parsed.ingredients[i]
+  const { data: allIngredients } = await supabase.from('ingredients').select('id, name')
+  const ingredientIdByLowerName = new Map(
+    (allIngredients ?? []).map((ing) => [ing.name.toLowerCase(), ing.id])
+  )
 
-    const { data: existing } = await supabase
+  const missingNames = [
+    ...new Set(
+      parsed.ingredients
+        .map((row) => row.ingredientName)
+        .filter((name) => !ingredientIdByLowerName.has(name.toLowerCase()))
+    ),
+  ]
+
+  if (missingNames.length > 0) {
+    const { data: created, error: ingredientError } = await supabase
       .from('ingredients')
-      .select('id')
-      .ilike('name', row.ingredientName)
-      .maybeSingle()
+      .insert(missingNames.map((name) => ({ name })))
+      .select('id, name')
+    if (ingredientError || !created) throw new Error('Failed to save ingredient')
+    for (const ing of created) ingredientIdByLowerName.set(ing.name.toLowerCase(), ing.id)
+  }
 
-    let ingredientId = existing?.id as string | undefined
-
-    if (!ingredientId) {
-      const { data: created, error: ingredientError } = await supabase
-        .from('ingredients')
-        .insert({ name: row.ingredientName })
-        .select('id')
-        .single()
-      if (ingredientError || !created) throw new Error('Failed to save ingredient')
-      ingredientId = created.id
-    }
-
-    await supabase.from('recipe_ingredients').insert({
+  await supabase.from('recipe_ingredients').insert(
+    parsed.ingredients.map((row, i) => ({
       recipe_id: recipe.id,
-      ingredient_id: ingredientId,
+      ingredient_id: ingredientIdByLowerName.get(row.ingredientName.toLowerCase()),
       quantity: row.quantity ?? null,
       unit: row.unit || null,
       note: row.note || null,
       position: i,
-    })
-  }
+    }))
+  )
 
   await supabase.from('recipe_steps').insert(
     parsed.steps.map((step, i) => ({

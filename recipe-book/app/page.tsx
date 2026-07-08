@@ -4,6 +4,10 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { RecipeCard } from '@/components/RecipeCard'
 import { FilterBar } from '@/components/FilterBar'
+import { DIET_OPTIONS } from '@/lib/constants'
+
+type Supabase = Awaited<ReturnType<typeof createClient>>
+type SlugRow = { id: string; slug: string }
 
 const TIME_BUCKETS: { value: string; label: string; min?: number; max?: number }[] = [
   { value: 'under15', label: 'Under 15 min', max: 15 },
@@ -12,18 +16,72 @@ const TIME_BUCKETS: { value: string; label: string; min?: number; max?: number }
   { value: '60plus', label: '60+ min', min: 60 },
 ]
 
-const DIET_OPTIONS = [
-  { value: 'veg', label: 'Veg' },
-  { value: 'egg', label: 'Egg' },
-  { value: 'non-veg', label: 'Non-veg' },
-  { value: 'vegan', label: 'Vegan' },
-]
-
 function toStr(v: string | string[] | undefined): string | undefined {
   return Array.isArray(v) ? v[0] : v
 }
 
-const EMPTY_UUID = '00000000-0000-0000-0000-000000000000'
+// Returns null when the filter isn't active, or the matching recipe ids
+// (possibly empty) when it is — an empty array means "no recipes match".
+async function resolveMealFilter(
+  supabase: Supabase,
+  mealTypes: SlugRow[] | null,
+  mealSlug: string | undefined
+): Promise<string[] | null> {
+  if (!mealSlug) return null
+  const mealType = mealTypes?.find((m) => m.slug === mealSlug)
+  if (!mealType) return []
+
+  const { data } = await supabase
+    .from('recipe_meal_types')
+    .select('recipe_id')
+    .eq('meal_type_id', mealType.id)
+  return [...new Set((data ?? []).map((r) => r.recipe_id))]
+}
+
+async function resolveIngredientSearch(
+  supabase: Supabase,
+  q: string | undefined,
+  match: 'any' | 'all'
+): Promise<string[] | null> {
+  if (!q) return null
+  const terms = q
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean)
+  if (terms.length === 0) return null
+
+  const { data: allIngredients } = await supabase.from('ingredients').select('id, name')
+
+  const perTermIngredientIds = terms.map((term) => {
+    const needle = term.toLowerCase()
+    return (allIngredients ?? [])
+      .filter((ing) => ing.name.toLowerCase().includes(needle))
+      .map((ing) => ing.id)
+  })
+
+  const allIngredientIds = [...new Set(perTermIngredientIds.flat())]
+  if (allIngredientIds.length === 0) return []
+
+  const { data: matchingRecipeIngredients } = await supabase
+    .from('recipe_ingredients')
+    .select('recipe_id, ingredient_id')
+    .in('ingredient_id', allIngredientIds)
+
+  const perTermRecipeIds = perTermIngredientIds.map((ingredientIds) => {
+    const idSet = new Set(ingredientIds)
+    return [
+      ...new Set(
+        (matchingRecipeIngredients ?? [])
+          .filter((ri) => idSet.has(ri.ingredient_id))
+          .map((ri) => ri.recipe_id)
+      ),
+    ]
+  })
+
+  return match === 'all'
+    ? perTermRecipeIds.reduce((acc, curr) => acc.filter((id) => curr.includes(id)))
+    : [...new Set(perTermRecipeIds.flat())]
+}
 
 export default async function Home({
   searchParams,
@@ -37,7 +95,7 @@ export default async function Home({
     meal: toStr(rawParams.meal),
     diet: toStr(rawParams.diet),
     q: toStr(rawParams.q),
-    match: toStr(rawParams.match) === 'all' ? 'all' : 'any',
+    match: (toStr(rawParams.match) === 'all' ? 'all' : 'any') as 'any' | 'all',
   }
 
   const supabase = await createClient()
@@ -59,9 +117,12 @@ export default async function Home({
     .eq('status', 'published')
     .order('created_at', { ascending: false })
 
+  let noResults = false
+
   if (params.cuisine) {
     const cuisine = cuisines?.find((c) => c.slug === params.cuisine)
-    query = query.eq('cuisine_id', cuisine?.id ?? EMPTY_UUID)
+    if (!cuisine) noResults = true
+    else query = query.eq('cuisine_id', cuisine.id)
   }
 
   if (params.diet) {
@@ -74,53 +135,22 @@ export default async function Home({
     if (bucket?.max !== undefined) query = query.lt('total_time_minutes', bucket.max)
   }
 
-  if (params.meal) {
-    const mealType = mealTypes?.find((m) => m.slug === params.meal)
-    const { data: mealRecipeIds } = await supabase
-      .from('recipe_meal_types')
-      .select('recipe_id')
-      .eq('meal_type_id', mealType?.id ?? EMPTY_UUID)
-    const ids = (mealRecipeIds ?? []).map((r) => r.recipe_id)
-    query = query.in('id', ids.length > 0 ? ids : [EMPTY_UUID])
+  const [mealIds, searchIds] = await Promise.all([
+    resolveMealFilter(supabase, mealTypes, params.meal),
+    resolveIngredientSearch(supabase, params.q, params.match),
+  ])
+
+  if (mealIds) {
+    if (mealIds.length === 0) noResults = true
+    else query = query.in('id', mealIds)
   }
 
-  if (params.q) {
-    const terms = params.q
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean)
-
-    const perTermRecipeIds: string[][] = []
-    for (const term of terms) {
-      const { data: matchingIngredients } = await supabase
-        .from('ingredients')
-        .select('id')
-        .ilike('name', `%${term}%`)
-      const ingredientIds = (matchingIngredients ?? []).map((i) => i.id)
-
-      if (ingredientIds.length === 0) {
-        perTermRecipeIds.push([])
-        continue
-      }
-
-      const { data: matchingRecipeIngredients } = await supabase
-        .from('recipe_ingredients')
-        .select('recipe_id')
-        .in('ingredient_id', ingredientIds)
-      perTermRecipeIds.push([...new Set((matchingRecipeIngredients ?? []).map((r) => r.recipe_id))])
-    }
-
-    const ids =
-      perTermRecipeIds.length === 0
-        ? []
-        : params.match === 'all'
-          ? perTermRecipeIds.reduce((acc, curr) => acc.filter((id) => curr.includes(id)))
-          : [...new Set(perTermRecipeIds.flat())]
-
-    query = query.in('id', ids.length > 0 ? ids : [EMPTY_UUID])
+  if (searchIds) {
+    if (searchIds.length === 0) noResults = true
+    else query = query.in('id', searchIds)
   }
 
-  const { data: recipes } = await query
+  const recipes = noResults ? [] : (await query).data
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-6 py-10">

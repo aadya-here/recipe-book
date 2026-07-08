@@ -1,16 +1,9 @@
-import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
+import { createClient, requireUserOrRedirect } from '@/utils/supabase/server'
 import { RecipeCard } from '@/components/RecipeCard'
 
 export default async function FavoritesPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login?next=/favorites')
-  }
+  const user = await requireUserOrRedirect(supabase, '/login?next=/favorites')
 
   const { data: favorites } = await supabase
     .from('favorites')

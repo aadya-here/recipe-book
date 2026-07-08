@@ -14,13 +14,6 @@ import { cn } from '@/lib/utils'
 
 type Facet = { value: string; label: string }
 
-const TIME_STYLES =
-  'border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100 dark:border-orange-800 dark:bg-orange-950/30 dark:text-orange-300'
-const TIME_ACTIVE = 'border-orange-500 bg-orange-500 text-white hover:bg-orange-500 dark:border-orange-500'
-const DIET_STYLES =
-  'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300'
-const DIET_ACTIVE = 'border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-500 dark:border-emerald-500'
-
 export function FilterBar({
   cuisines,
   mealTypes,
@@ -104,35 +97,31 @@ export function FilterBar({
 
         <span className="mx-1 hidden h-5 w-px bg-border sm:block" />
 
-        {timeBuckets.map((t) => (
-          <button
-            key={t.value}
-            type="button"
-            onClick={() => setParam('time', time === t.value ? null : t.value)}
-            className={cn(
-              'rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors',
-              time === t.value ? TIME_ACTIVE : TIME_STYLES
-            )}
-          >
-            ⏱ {t.label}
-          </button>
-        ))}
+        <Select value={time} onValueChange={(v) => setParam('time', v === time ? null : v)}>
+          <SelectTrigger size="sm" className="bg-background">
+            <SelectValue placeholder="Any time" />
+          </SelectTrigger>
+          <SelectContent>
+            {timeBuckets.map((t) => (
+              <SelectItem key={t.value} value={t.value}>
+                {t.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        <span className="mx-1 hidden h-5 w-px bg-border sm:block" />
-
-        {dietOptions.map((d) => (
-          <button
-            key={d.value}
-            type="button"
-            onClick={() => setParam('diet', diet === d.value ? null : d.value)}
-            className={cn(
-              'rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors',
-              diet === d.value ? DIET_ACTIVE : DIET_STYLES
-            )}
-          >
-            {d.label}
-          </button>
-        ))}
+        <Select value={diet} onValueChange={(v) => setParam('diet', v === diet ? null : v)}>
+          <SelectTrigger size="sm" className="bg-background">
+            <SelectValue placeholder="Any diet" />
+          </SelectTrigger>
+          <SelectContent>
+            {dietOptions.map((d) => (
+              <SelectItem key={d.value} value={d.value}>
+                {d.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex items-center gap-2">

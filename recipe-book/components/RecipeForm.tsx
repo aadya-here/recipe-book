@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, X } from 'lucide-react'
 import { z } from 'zod'
 import { recipeSchema, type RecipeFormValues } from '@/lib/schemas/recipe'
+import { DIET_OPTIONS } from '@/lib/constants'
 
 type RecipeFormInput = z.input<typeof recipeSchema>
 import { createRecipe } from '@/app/actions/recipes'
@@ -22,13 +23,6 @@ import {
 } from '@/components/ui/select'
 
 type Option = { id: string; name: string }
-
-const DIET_OPTIONS = [
-  { value: 'veg', label: 'Veg' },
-  { value: 'egg', label: 'Egg' },
-  { value: 'non-veg', label: 'Non-veg' },
-  { value: 'vegan', label: 'Vegan' },
-] as const
 
 export function RecipeForm({ cuisines, mealTypes }: { cuisines: Option[]; mealTypes: Option[] }) {
   const [photo, setPhoto] = useState<File | null>(null)

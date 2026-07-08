@@ -1,5 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
+import { createClient, requireUserOrRedirect } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
@@ -19,13 +18,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default async function MyRecipesPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login?next=/my-recipes')
-  }
+  const user = await requireUserOrRedirect(supabase, '/login?next=/my-recipes')
 
   const { data: recipes } = await supabase
     .from('recipes')

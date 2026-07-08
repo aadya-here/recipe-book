@@ -1,16 +1,9 @@
-import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
+import { createClient, requireUserOrRedirect } from '@/utils/supabase/server'
 import { RecipeForm } from '@/components/RecipeForm'
 
 export default async function SubmitPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login?next=/submit')
-  }
+  await requireUserOrRedirect(supabase, '/login?next=/submit')
 
   const [{ data: cuisines }, { data: mealTypes }] = await Promise.all([
     supabase.from('cuisines').select('id, name').order('name'),

@@ -4,7 +4,7 @@ import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { addComment, deleteComment } from '@/app/actions/comments'
-import { cn } from '@/lib/utils'
+import { cn, pickRotation } from '@/lib/utils'
 
 type Comment = {
   id: string
@@ -75,7 +75,7 @@ export function CommentsSection({
               key={comment.id}
               className={cn(
                 'group relative w-48 rounded-sm bg-yellow-200 p-4 text-sm text-yellow-950 shadow-md transition-transform hover:z-10 hover:rotate-0',
-                ROTATIONS[i % ROTATIONS.length]
+                pickRotation(i, ROTATIONS)
               )}
             >
               <button

@@ -1,13 +1,10 @@
 'use server'
-import { createClient } from '@/utils/supabase/server'
+import { createClient, requireUser } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export async function toggleFavorite(recipeId: string, slug: string, isFavorited: boolean) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error('Must be signed in')
+  const user = await requireUser(supabase)
 
   if (isFavorited) {
     await supabase

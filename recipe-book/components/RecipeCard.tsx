@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
+import { cn, pickRotation } from '@/lib/utils'
 
 type Recipe = {
   id: string
@@ -24,7 +24,7 @@ export function RecipeCard({ recipe, index = 0 }: { recipe: Recipe; index?: numb
       href={`/r/${recipe.slug}`}
       className={cn(
         'group flex flex-col gap-3 rounded-sm border border-amber-900/25 bg-amber-100 p-4 shadow-md transition-transform hover:z-10 hover:-translate-y-0.5 hover:rotate-0 hover:shadow-lg dark:border-amber-100/10 dark:bg-amber-950/40',
-        ROTATIONS[index % ROTATIONS.length]
+        pickRotation(index, ROTATIONS)
       )}
       style={{
         backgroundImage:
