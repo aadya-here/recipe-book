@@ -14,13 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { LabeledSelect } from '@/components/ui/select'
 
 type Option = { id: string; name: string }
 
@@ -117,18 +111,13 @@ export function RecipeForm({ cuisines, mealTypes }: { cuisines: Option[]; mealTy
               control={control}
               name="cuisineId"
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Choose a cuisine" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cuisines.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <LabeledSelect
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={cuisines.map((c) => ({ value: c.id, label: c.name }))}
+                  placeholder="Choose a cuisine"
+                  className="w-full"
+                />
               )}
             />
           </div>
@@ -139,18 +128,13 @@ export function RecipeForm({ cuisines, mealTypes }: { cuisines: Option[]; mealTy
               control={control}
               name="dietType"
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Choose diet type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DIET_OPTIONS.map((d) => (
-                      <SelectItem key={d.value} value={d.value}>
-                        {d.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <LabeledSelect
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={DIET_OPTIONS}
+                  placeholder="Choose diet type"
+                  className="w-full"
+                />
               )}
             />
           </div>

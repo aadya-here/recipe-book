@@ -2,13 +2,7 @@
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Search, X } from 'lucide-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { LabeledSelect } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
@@ -69,59 +63,43 @@ export function FilterBar({
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-3">
       <div className="flex flex-wrap items-center gap-2">
-        <Select value={cuisine} onValueChange={(v) => setParam('cuisine', v === cuisine ? null : v)}>
-          <SelectTrigger size="sm" className="bg-background">
-            <SelectValue placeholder="Any cuisine" />
-          </SelectTrigger>
-          <SelectContent>
-            {cuisines.map((c) => (
-              <SelectItem key={c.value} value={c.value}>
-                {c.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <LabeledSelect
+          value={cuisine}
+          onValueChange={(v) => setParam('cuisine', v === cuisine ? null : v)}
+          options={cuisines}
+          placeholder="Any cuisine"
+          size="sm"
+          className="bg-background"
+        />
 
-        <Select value={meal} onValueChange={(v) => setParam('meal', v === meal ? null : v)}>
-          <SelectTrigger size="sm" className="bg-background">
-            <SelectValue placeholder="Any meal" />
-          </SelectTrigger>
-          <SelectContent>
-            {mealTypes.map((m) => (
-              <SelectItem key={m.value} value={m.value}>
-                {m.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <LabeledSelect
+          value={meal}
+          onValueChange={(v) => setParam('meal', v === meal ? null : v)}
+          options={mealTypes}
+          placeholder="Any meal"
+          size="sm"
+          className="bg-background"
+        />
 
         <span className="mx-1 hidden h-5 w-px bg-border sm:block" />
 
-        <Select value={time} onValueChange={(v) => setParam('time', v === time ? null : v)}>
-          <SelectTrigger size="sm" className="bg-background">
-            <SelectValue placeholder="Any time" />
-          </SelectTrigger>
-          <SelectContent>
-            {timeBuckets.map((t) => (
-              <SelectItem key={t.value} value={t.value}>
-                {t.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <LabeledSelect
+          value={time}
+          onValueChange={(v) => setParam('time', v === time ? null : v)}
+          options={timeBuckets}
+          placeholder="Any time"
+          size="sm"
+          className="bg-background"
+        />
 
-        <Select value={diet} onValueChange={(v) => setParam('diet', v === diet ? null : v)}>
-          <SelectTrigger size="sm" className="bg-background">
-            <SelectValue placeholder="Any diet" />
-          </SelectTrigger>
-          <SelectContent>
-            {dietOptions.map((d) => (
-              <SelectItem key={d.value} value={d.value}>
-                {d.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <LabeledSelect
+          value={diet}
+          onValueChange={(v) => setParam('diet', v === diet ? null : v)}
+          options={dietOptions}
+          placeholder="Any diet"
+          size="sm"
+          className="bg-background"
+        />
       </div>
 
       <div className="flex items-center gap-2">

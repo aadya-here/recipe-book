@@ -190,6 +190,41 @@ function SelectScrollDownButton({
   )
 }
 
+type LabeledSelectOption = { value: string; label: string }
+
+function LabeledSelect({
+  value,
+  onValueChange,
+  options,
+  placeholder,
+  size,
+  className,
+}: {
+  value?: string
+  onValueChange: (value: string) => void
+  options: LabeledSelectOption[]
+  placeholder: string
+  size?: "sm" | "default"
+  className?: string
+}) {
+  return (
+    <Select value={value} onValueChange={(v) => onValueChange(v ?? '')}>
+      <SelectTrigger size={size} className={className}>
+        <SelectValue placeholder={placeholder}>
+          {(v: string) => options.find((o) => o.value === v)?.label}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((o) => (
+          <SelectItem key={o.value} value={o.value}>
+            {o.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+}
+
 export {
   Select,
   SelectContent,
@@ -201,4 +236,5 @@ export {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
+  LabeledSelect,
 }
