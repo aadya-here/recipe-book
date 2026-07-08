@@ -53,7 +53,7 @@ export function CommentsSection({
         Your notes on this recipe
       </h2>
       <p className="text-xs text-muted-foreground">
-        Only you can see these — like scribbles in the margin of your own cookbook.
+        Only you can see these, like small scribbles in the margin of your own cookbook.
       </p>
 
       <div className="flex flex-col gap-3 rounded-lg bg-amber-100/60 p-4 dark:bg-amber-950/20">

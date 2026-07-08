@@ -12,6 +12,25 @@ function slugify(title: string) {
     .replace(/(^-|-$)/g, '')
 }
 
+export async function getRandomRecipeSlug(source: 'all' | 'favorites'): Promise<string | null> {
+  const supabase = await createClient()
+
+  if (source === 'favorites') {
+    const user = await requireUser(supabase)
+    const { data } = await supabase
+      .from('favorites')
+      .select('recipes ( slug )')
+      .eq('user_id', user.id)
+    const slugs = (data ?? []).flatMap((f) => f.recipes ?? []).map((r) => r.slug)
+    if (slugs.length === 0) return null
+    return slugs[Math.floor(Math.random() * slugs.length)]
+  }
+
+  const { data } = await supabase.from('recipes').select('slug').eq('status', 'published')
+  if (!data || data.length === 0) return null
+  return data[Math.floor(Math.random() * data.length)].slug
+}
+
 export async function createRecipe(values: RecipeFormValues, photo: File | null, publish: boolean) {
   const parsed = recipeSchema.parse(values)
 

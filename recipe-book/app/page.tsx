@@ -1,9 +1,8 @@
 import { Suspense } from 'react'
 import { createClient } from '@/utils/supabase/server'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { RecipeCard } from '@/components/RecipeCard'
 import { FilterBar } from '@/components/FilterBar'
+import { ShuffleButton } from '@/components/ShuffleButton'
 import { DIET_OPTIONS } from '@/lib/constants'
 
 type Supabase = Awaited<ReturnType<typeof createClient>>
@@ -100,9 +99,10 @@ export default async function Home({
 
   const supabase = await createClient()
 
-  const [{ data: cuisines }, { data: mealTypes }] = await Promise.all([
+  const [{ data: cuisines }, { data: mealTypes }, { data: { user } }] = await Promise.all([
     supabase.from('cuisines').select('id, name, slug').order('name'),
     supabase.from('meal_types').select('id, name, slug').order('name'),
+    supabase.auth.getUser(),
   ])
 
   let query = supabase
@@ -155,10 +155,11 @@ export default async function Home({
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-6 py-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Recipes</h1>
-        <Button size="sm" render={<Link href="/submit" />}>
+        <h1 className="text-xl font-semibold">Recipes for Single Servings</h1>
+        {/* <Button size="sm" render={<Link href="/submit" />}>
           Submit a recipe
-        </Button>
+        </Button> */}
+        <ShuffleButton isLoggedIn={Boolean(user)} />
       </div>
 
       <Suspense>

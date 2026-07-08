@@ -14,7 +14,7 @@ export async function SiteHeader() {
     <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-6 sm:py-4">
       <div className="flex items-center gap-5">
         <Link href="/" className="shrink-0 text-sm font-semibold">
-          Recipe Book
+          The Recipe Book
         </Link>
 
         {user && (
