@@ -28,7 +28,7 @@ export const recipeSchema = z.object({
     .array(
       z.object({
         instruction: z.string().trim().min(1, 'Required'),
-        timerSeconds: optionalNumber,
+        timerMinutes: optionalNumber,
       })
     )
     .min(1, 'Add at least one step'),

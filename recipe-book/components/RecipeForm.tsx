@@ -24,10 +24,33 @@ import {
 
 type Option = { id: string; name: string }
 
+const SPICE_POWDERS = [
+  'Turmeric powder',
+  'Red chili powder',
+  'Coriander powder',
+  'Cumin powder',
+  'Garam masala',
+  'Black pepper powder',
+  'Amchur (dry mango powder)',
+  'Asafoetida (hing)',
+  'Paprika',
+  'Cinnamon powder',
+]
+
 export function RecipeForm({ cuisines, mealTypes }: { cuisines: Option[]; mealTypes: Option[] }) {
   const [photo, setPhoto] = useState<File | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [serverError, setServerError] = useState('')
+  const [selectedSpices, setSelectedSpices] = useState<Set<string>>(new Set())
+
+  function toggleSpice(spice: string, checked: boolean) {
+    setSelectedSpices((prev) => {
+      const next = new Set(prev)
+      if (checked) next.add(spice)
+      else next.delete(spice)
+      return next
+    })
+  }
 
   const {
     register,
@@ -53,7 +76,11 @@ export function RecipeForm({ cuisines, mealTypes }: { cuisines: Option[]; mealTy
     setSubmitting(true)
     setServerError('')
     try {
-      await createRecipe(values, photo, publish)
+      const ingredients = [
+        ...values.ingredients,
+        ...Array.from(selectedSpices).map((name) => ({ ingredientName: name })),
+      ]
+      await createRecipe({ ...values, ingredients }, photo, publish)
     } catch (err) {
       setSubmitting(false)
       setServerError(err instanceof Error ? err.message : 'Something went wrong')
@@ -212,6 +239,21 @@ export function RecipeForm({ cuisines, mealTypes }: { cuisines: Option[]; mealTy
         {errors.ingredients?.root && (
           <p className="text-sm text-destructive">{errors.ingredients.root.message}</p>
         )}
+
+        <div className="flex flex-col gap-1.5 pt-2">
+          <Label>Spice powders</Label>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {SPICE_POWDERS.map((spice) => (
+              <label key={spice} className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={selectedSpices.has(spice)}
+                  onCheckedChange={(checked) => toggleSpice(spice, checked === true)}
+                />
+                {spice}
+              </label>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -232,9 +274,9 @@ export function RecipeForm({ cuisines, mealTypes }: { cuisines: Option[]; mealTy
             <span className="pt-2 text-sm text-muted-foreground">{i + 1}.</span>
             <Textarea rows={2} placeholder="Instruction" {...register(`steps.${i}.instruction`)} />
             <Input
-              placeholder="Timer (sec)"
+              placeholder="Timer (min)"
               type="number"
-              {...register(`steps.${i}.timerSeconds`)}
+              {...register(`steps.${i}.timerMinutes`)}
             />
             <Button
               type="button"

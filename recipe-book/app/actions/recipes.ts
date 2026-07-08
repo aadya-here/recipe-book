@@ -107,7 +107,7 @@ export async function createRecipe(values: RecipeFormValues, photo: File | null,
       recipe_id: recipe.id,
       step_number: i + 1,
       instruction: step.instruction,
-      timer_seconds: step.timerSeconds ?? null,
+      timer_seconds: step.timerMinutes != null ? Math.round(step.timerMinutes * 60) : null,
     }))
   )
 
