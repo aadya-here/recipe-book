@@ -497,9 +497,9 @@ create policy "users update own ratings"
 create policy "users delete own ratings"
   on ratings for delete using (auth.uid() = user_id);
 
--- ---- comments: public read, write own only (visible to all per PRD default) ----
-create policy "comments are publicly readable"
-  on comments for select using (true);
+-- ---- comments: private notes, only the author (or admin) can see their own ----
+create policy "users read own comments"
+  on comments for select using (auth.uid() = user_id or public.is_admin());
 create policy "authenticated users add comments"
   on comments for insert with check (auth.uid() = user_id);
 create policy "users edit own comments"
