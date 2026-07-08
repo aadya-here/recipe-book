@@ -105,11 +105,12 @@ export default async function Home({
     supabase.auth.getUser(),
   ])
 
+  // servings column was dropped — no longer selected
   let query = supabase
     .from('recipes')
     .select(
       `
-      id, slug, title, diet_type, total_time_minutes, prep_time_minutes, cook_time_minutes, servings,
+      id, slug, title, diet_type, total_time_minutes, prep_time_minutes, cook_time_minutes,
       cuisines ( name ),
       recipe_photos ( url, is_primary )
     `

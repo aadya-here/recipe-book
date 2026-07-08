@@ -8,7 +8,7 @@ type Recipe = {
   diet_type: string
   prep_time_minutes: number | null
   cook_time_minutes: number | null
-  servings: number | null
+  // servings: number | null // servings column was dropped — no longer fetched
   cuisines: { name: string }[] | null
   recipe_photos: { url: string; is_primary: boolean }[]
 }

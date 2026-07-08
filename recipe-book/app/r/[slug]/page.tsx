@@ -10,12 +10,13 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
     data: { user },
   } = await supabase.auth.getUser()
 
+  // servings column was dropped — no longer selected
   const { data: recipe } = await supabase
     .from('recipes')
     .select(
       `
       id, slug, title, description, diet_type, prep_time_minutes, cook_time_minutes,
-      total_time_minutes, servings, status,
+      total_time_minutes, status,
       cuisines ( name ),
       recipe_meal_types ( meal_types ( name ) ),
       recipe_ingredients ( id, quantity, unit, note, position, ingredients ( name ) ),
@@ -92,7 +93,9 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
           {recipe.total_time_minutes ? (
             <span className="rounded-full bg-muted px-2.5 py-1">{recipe.total_time_minutes} min</span>
           ) : null}
+          {/* servings column was dropped — no longer displayed
           {recipe.servings && <span className="rounded-full bg-muted px-2.5 py-1">Serves {recipe.servings}</span>}
+          */}
         </div>
       </div>
 

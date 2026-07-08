@@ -53,7 +53,7 @@ export async function createRecipe(values: RecipeFormValues, photo: File | null,
       diet_type: parsed.dietType,
       prep_time_minutes: parsed.prepTimeMinutes ?? null,
       cook_time_minutes: parsed.cookTimeMinutes ?? null,
-      servings: parsed.servings ?? null,
+      // servings: parsed.servings ?? null, // servings column was dropped — no longer inserted
       status: publish ? 'published' : 'draft',
     })
     .select('id, slug')

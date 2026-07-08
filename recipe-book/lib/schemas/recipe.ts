@@ -13,7 +13,7 @@ export const recipeSchema = z.object({
   mealTypeIds: z.array(z.string()).min(1, 'Pick at least one meal type'),
   prepTimeMinutes: optionalNumber,
   cookTimeMinutes: optionalNumber,
-  servings: optionalNumber,
+  // servings: optionalNumber, // servings column was dropped — no longer collected
   ingredients: z
     .array(
       z.object({

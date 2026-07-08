@@ -170,10 +170,12 @@ export function RecipeForm({ cuisines, mealTypes }: { cuisines: Option[]; mealTy
             <Label htmlFor="cookTimeMinutes">Cook time (min)</Label>
             <Input id="cookTimeMinutes" type="number" {...register('cookTimeMinutes')} />
           </div>
+          {/* servings column was dropped — no longer collected
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="servings">Servings</Label>
             <Input id="servings" type="number" {...register('servings')} />
           </div>
+          */}
         </div>
       </div>
 

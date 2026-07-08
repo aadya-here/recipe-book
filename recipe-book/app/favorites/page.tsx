@@ -5,13 +5,14 @@ export default async function FavoritesPage() {
   const supabase = await createClient()
   const user = await requireUserOrRedirect(supabase, '/login?next=/favorites')
 
+  // servings column was dropped — no longer selected
   const { data: favorites } = await supabase
     .from('favorites')
     .select(
       `
       recipe_id,
       recipes (
-        id, slug, title, diet_type, prep_time_minutes, cook_time_minutes, servings,
+        id, slug, title, diet_type, prep_time_minutes, cook_time_minutes,
         cuisines ( name ),
         recipe_photos ( url, is_primary )
       )
