@@ -96,6 +96,16 @@ export function RecipeForm({ cuisines, mealTypes }: { cuisines: Option[]; mealTy
         </div>
 
         <div className="flex flex-col gap-1.5">
+          <Label htmlFor="chefTip">Chef&apos;s tip</Label>
+          <Textarea
+            id="chefTip"
+            rows={2}
+            placeholder="e.g. Toast the spices first for a deeper flavor"
+            {...register('chefTip')}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
           <Label>Photo</Label>
           <Input
             type="file"

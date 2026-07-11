@@ -15,7 +15,7 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
     .from('recipes')
     .select(
       `
-      id, slug, title, description, diet_type, prep_time_minutes, cook_time_minutes,
+      id, slug, title, description, chef_tip, diet_type, prep_time_minutes, cook_time_minutes,
       total_time_minutes, status,
       cuisines ( name ),
       recipe_meal_types ( meal_types ( name ) ),
@@ -99,6 +99,8 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
         </div>
       </div>
 
+      
+
       <div className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold text-muted-foreground">Ingredients</h2>
         <ul className="flex flex-col gap-1 text-sm">
@@ -125,6 +127,18 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
           ))}
         </ol>
       </div>
+
+      {recipe.chef_tip && (
+        <div className="flex gap-3 rounded-lg border-l-4 border-amber-500 bg-amber-100 p-4 dark:bg-amber-950/30">
+          <span className="text-xl leading-none">💡</span>
+          <div className="flex flex-col gap-0.5">
+            <h2 className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+              Chef&apos;s tip
+            </h2>
+            <p className="text-sm text-amber-900/90 dark:text-amber-100/90">{recipe.chef_tip}</p>
+          </div>
+        </div>
+      )}
 
       {user && (
         <CommentsSection recipeId={recipe.id} slug={recipe.slug} initialComments={comments} />

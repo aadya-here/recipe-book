@@ -121,6 +121,7 @@ create table recipes (
   slug text not null unique,
   title text not null,
   description text,
+  chef_tip text,
   author_id uuid not null references profiles (id),
   cuisine_id uuid references cuisines (id),
   diet_type text not null check (diet_type in ('veg', 'egg', 'non-veg', 'vegan')),

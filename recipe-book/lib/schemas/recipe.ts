@@ -8,6 +8,7 @@ const optionalNumber = z.preprocess(
 export const recipeSchema = z.object({
   title: z.string().trim().min(3, 'Title is too short'),
   description: z.string().trim().optional(),
+  chefTip: z.string().trim().optional(),
   cuisineId: z.string().optional(),
   dietType: z.enum(['veg', 'egg', 'non-veg', 'vegan']),
   mealTypeIds: z.array(z.string()).min(1, 'Pick at least one meal type'),
