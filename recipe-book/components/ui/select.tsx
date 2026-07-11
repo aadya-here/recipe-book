@@ -211,7 +211,7 @@ function LabeledSelect({
     <Select value={value} onValueChange={(v) => onValueChange(v ?? '')}>
       <SelectTrigger size={size} className={className}>
         <SelectValue placeholder={placeholder}>
-          {(v: string) => options.find((o) => o.value === v)?.label}
+          {(v: string) => options.find((o) => o.value === v)?.label ?? placeholder}
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
