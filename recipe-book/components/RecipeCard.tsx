@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { cn, pickRotation } from '@/lib/utils'
+import { cn, pickRotation, toOne } from '@/lib/utils'
 
 type Recipe = {
   id: string
@@ -9,7 +9,10 @@ type Recipe = {
   prep_time_minutes: number | null
   cook_time_minutes: number | null
   // servings: number | null // servings column was dropped — no longer fetched
-  cuisines: { name: string }[] | null
+  // cuisine_id is a many-to-one FK, so Postgrest returns a single object at
+  // runtime even though its inferred type (no generated Database types here)
+  // is array-shaped — hence the union and the toOne() unwrap below.
+  cuisines: { name: string } | { name: string }[] | null
   recipe_photos: { url: string; is_primary: boolean }[]
 }
 
@@ -17,7 +20,7 @@ const ROTATIONS = ['-rotate-1', 'rotate-1', '-rotate-[0.6deg]', 'rotate-[0.6deg]
 
 export function RecipeCard({ recipe, index = 0 }: { recipe: Recipe; index?: number }) {
   const photo = recipe.recipe_photos.find((p) => p.is_primary) ?? recipe.recipe_photos[0]
-  const cuisine = recipe.cuisines?.[0]?.name
+  const cuisine = toOne(recipe.cuisines)?.name
 
   return (
     <Link

@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import { FavoriteButton } from '@/components/FavoriteButton'
 import { CommentsSection } from '@/components/CommentsSection'
+import { toOne } from '@/lib/utils'
 
 export default async function RecipePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -11,6 +12,12 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
   } = await supabase.auth.getUser()
 
   // servings column was dropped — no longer selected
+  //
+  // Embed shapes below: cuisines/meal_types/ingredients are each reached via
+  // a many-to-one FK (this row -> exactly one of them), so Postgrest returns
+  // a single object at runtime — unwrap with toOne(). recipe_meal_types,
+  // recipe_ingredients, recipe_steps, and recipe_photos are true one-to-many
+  // (many rows reference this recipe) and stay as arrays as-is.
   const { data: recipe } = await supabase
     .from('recipes')
     .select(
@@ -56,6 +63,7 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
   const ingredients = [...recipe.recipe_ingredients].sort((a, b) => a.position - b.position)
   const steps = [...recipe.recipe_steps].sort((a, b) => a.step_number - b.step_number)
   const photo = recipe.recipe_photos.find((p) => p.is_primary) ?? recipe.recipe_photos[0]
+  const cuisineName = toOne(recipe.cuisines)?.name
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-6 py-10">
@@ -81,13 +89,13 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
         )}
 
         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-          {recipe.cuisines?.[0]?.name && (
-            <span className="rounded-full bg-muted px-2.5 py-1">{recipe.cuisines[0].name}</span>
+          {cuisineName && (
+            <span className="rounded-full bg-muted px-2.5 py-1">{cuisineName}</span>
           )}
           <span className="rounded-full bg-muted px-2.5 py-1 capitalize">{recipe.diet_type}</span>
           {recipe.recipe_meal_types.map((rmt, i) => (
             <span key={i} className="rounded-full bg-muted px-2.5 py-1">
-              {rmt.meal_types?.[0]?.name}
+              {toOne(rmt.meal_types)?.name}
             </span>
           ))}
           {recipe.total_time_minutes ? (
@@ -106,7 +114,7 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
         <ul className="flex flex-col gap-1 text-sm">
           {ingredients.map((ing) => (
             <li key={ing.id}>
-              {[ing.quantity, ing.unit, ing.ingredients?.[0]?.name].filter(Boolean).join(' ')}
+              {[ing.quantity, ing.unit, toOne(ing.ingredients)?.name].filter(Boolean).join(' ')}
               {ing.note ? ` (${ing.note})` : ''}
             </li>
           ))}
